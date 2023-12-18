@@ -59,5 +59,5 @@ int main()
   printf("%s\n", now.toString().c_str()); // 测试now() + copy ctor
   passByValue(now); // 测试值传递
   passByConstReference(now); // 测试引用传递
-  benchmark();
+//   benchmark();
 }
