@@ -1,0 +1,1 @@
+add_executable(Timestamp_unittest ${CMAKE_SOURCE_DIR}/src/Timestamp.cpp ${CMAKE_SOURCE_DIR}/test/Timestamp_unittest.cpp)
