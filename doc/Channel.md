@@ -1,107 +1,333 @@
 # 什么是Channel
-Channel 对文件描述符和事件进行了一层封装。平常我们写网络编程相关函数，基本就是创建套接字，绑定地址，转变为可监听状态（这部分我们在 Socket 类中实现过了，交给 Acceptor 调用即可），然后接受连接。
 
-但是得到了一个初始化好的 socket 还不够，我们是需要监听这个 socket 上的事件并且处理事件的。比如我们在 Reactor 模型中使用了 epoll 监听该 socket 上的事件，我们还需将需要被监视的套接字和监视的事件注册到 epoll 对象中。
+一个Channel对象绑定了一个fd（文件描述符），可以用来监听发生在fd上的事件，事件包括空事件（不监听）、可读事件、写完成事件。当fd上被监听事件就绪时，对应Channel对象就会被Poller放入激活队列（activeChannels_），进而在loop循环中调用封装在Channel的相应回调来处理事件。
 
-可以想到文件描述符和事件和 IO 函数全都混在在了一起，极其不好维护。而 muduo 中的 Channel 类将文件描述符和其感兴趣的事件（需要监听的事件）封装到了一起。而事件监听相关的代码放到了 Poller/EPollPoller 类中。
+Channel可以通过EventLoop，向Poller更新自己关心的（监听）事件（通过map Poller::channels_存储）。具体来说，对于PollPoller对象，会同步更新（poll(2)）传给内核的poll事件数组pollfds_；对于EPollPoller对象，会同步更新（epoll(7)）传递给内核的epoll事件数组events_；
 
-# 成员变量
-```cpp
+可以这样理解，poll/epoll监听的是fd（上指定的事件pollfd.events），Poller监听的是Channel对象（上指定的事件events_），当监听到事件就绪时，将对应通道加入激活通道队列，在EventLoop的loop循环中依次调用Channel中注册的事件回调。
+
+# Channel 类
+
+每个Channel对象从始至终只负责一个文件描述符（fd）的IO事件分发，但不拥有fd，也不会在析构时关闭fd。而是由诸如TcpConnection、Acceptor、EventLoop等，这样需要监听指定文件描述符上事件的类，将fd通过构造函数传递给Channel。
+Channel会把不同的IO事件分发为不同的回调，如ReadCallback、WriteCallback，回调对象类型用std::function<>表示，用来定义某个可调用类型。
+
+事件回调类型：
+
+```c++
+#include <functional>
+
+typedef std::function<void()> EventCallback;
+typedef std::function<void(Timestamp)> ReadEventCallback;
+```
+
+Channel成员函数主要包括：
+1）设置事件处理的回调函数set *Callback（如setReadCallback）；
+2）使能fd关心的事件events_，可调用enable* （如enableReading），该fd及关心的事件会注册到Poller中进行监听；
+3）关闭fd关心的事件events_，可调用disable*（如disableReading），会更新该fd在Poller中监听的事件；
+4）关闭fd关心的所有事件events_，可调用disableAll，会更新该fd在Poller中监听的事件；
+5）删除对fd的监听，会将其从Poller的ChannelMap中移除；
+6）Poller监听到Channel事件被激活时，将其加入到激活列表，在EventLoop中回调handleEvent。
+
+## Channel类声明
+
+```c++
 /**
-* const int Channel::kNoneEvent = 0;
-* const int Channel::kReadEvent = EPOLLIN | EPOLLPRI;
-* const int Channel::kWriteEvent = EPOLLOUT;
+* Channel绑定一个fd, 用于设置fd上要监听的事件, 以及相应的回调函数.
+* Poller监听到有通道绑定的事件发生, 就会将其加入激活的通道列表,
+* 然后在EventLoop::loop()中调用该Channel对应事件注册的回调函数
 */
-static const int kNoneEvent;
-static const int kReadEvent;
-static const int kWriteEvent;
+class Channel : private noncopyable
+{
+public:
+    typedef std::function<void()> EventCallback; // 除了读事件, 用于其他事件(如写/关闭/错误)回调类型
+    typedef std::function<void(Timestamp)> ReadEventCallback; // 读事件回调类型
 
-EventLoop *loop_;   // 当前Channel属于的EventLoop
-const int fd_;      // fd, Poller监听对象
-int events_;        // 注册fd感兴趣的事件
-int revents_;       // poller返回的具体发生的事件
-int index_;         // 在Poller上注册的情况
+    Channel(EventLoop* loop, int fd__);
+    ~Channel()
 
-std::weak_ptr<void> tie_;   // 弱指针指向TcpConnection(必要时升级为shared_ptr多一份引用计数，避免用户误删)
-bool tied_;  // 标志此 Channel 是否被调用过 Channel::tie 方法
+    /* 处理事件, 监听事件激活时, 由EventLoop::loop调用 */
+    void handleEvent(Timestamp recevieTime);
+    /* 设置事件回调，由Channel对象持有者配置Channel事件回调时调用 */
+    void setReadCallback(ReadEventCallback cb)
+    { readCallback_ = std::move(cb); }
+    void setWriteCallback(EventCallback cb)
+    { writeCallback_ = std::move(cb); }
+    void setCloseCallback(EventCallback cb)
+    { closeCallback_ = std::move(cb); }
+    void setErrorCallback(EventCallback cb)
+    { errorCallback_ = std::move(cb); }
 
-// 保存着事件到来时的回调函数
-ReadEventCallback readCallback_; 	// 读事件回调函数
-EventCallback writeCallback_;		// 写事件回调函数
-EventCallback closeCallback_;		// 连接关闭回调函数
-EventCallback errorCallback_;		// 错误发生回调函数
+    /* 将shared_ptr管理的对象系到本地weak_ptr管理的tie_, 可用于保存TcpConnection指针 */
+    void tie(const std::shared_ptr<void>&);
+
+    int fd() const { return fd_; }
+    int events() const { return events_; }
+    void set_revents(int revt) { revents_ = revt; } // used by poller
+//    int revents() const { return revents_; }
+    bool isNoneEvent() const { return events_ == kNoneEvent; }
+
+    /* 使能/禁用 监听 可读/可写事件, 会影响Poller监听的通道列表 */
+    void enableReading() { events_ |= kReadEvent; update(); }
+    void disableReading() { events_ &= ~kReadEvent; update(); }
+    void enableWriting() { events_ |= kWriteEvent; update(); }
+    void disableWriting() { events_ &= ~kWriteEvent; update(); }
+    void disableAll() { events_ = kNoneEvent; update(); }
+    /* 判断是否请求监听 可写事件 */
+    bool isWriting() const { return events_ & kWriteEvent; }
+    /* 判断是否请求监听 可读事件 */
+    bool isReading() const { return events_ & kReadEvent; }
+
+    // for Poller
+    int index() { return index_; }
+    void set_index(int idx) { index_ = idx; }
+
+    // for debug
+    string reventsToString() const;
+    string eventsToString() const;
+
+    void doNotLogHup() { logHup_ = false; }
+
+    EventLoop* ownerLoop() { return loop_; }
+    /* 从EventLoop中移除当前通道.
+     * 建议在移除前禁用所有事件
+     */
+    void remove();
+
+private:
+    /* 将fd对应事件转化为字符串 */
+    static string eventsToString(int fd, int ev);
+    /* update()将调用EventLoop::updateChannel更新监听的通道 */
+    void update();
+    /* 根据不同的事件源激活不同的回调函数，来处理事件 */
+    void handleEventWithGuard(Timestamp receiveTime);
+
+    static const int kNoneEvent;
+    static const int kReadEvent;
+    static const int kWriteEvent;
+
+    EventLoop* loop_;
+    const int fd_; // file descriptor
+    int events_;   // request events, set by user
+    int revents_;  // returned events, current active events, set by EventLoop/Poller
+    // used by Poller
+    // PollPoller: index of poll fds array mapped to fd_
+    // EPollPoller: operation type for fd: kNew, kAdded, kDeleted
+    int index_;
+    bool logHup_;
+    /* 使用weak_ptr指向shared_ptr所指对象, 防止循环引用. 通常是生命周期不确定的对象, 如TcpConnection */
+    std::weak_ptr<void> tie_;
+    bool tied_; /* weak_ptr tie_绑定对象的标志 */
+    bool eventHandling_; /* 正在处理事件的标志 */
+    bool addedToLoop_;   /* 加入到loop中, 被监听/处理的标志 */
+    ReadEventCallback readCallback_; /* 可读事件回调 */
+    EventCallback writeCallback_;    /* 可写事件回调 */
+    EventCallback closeCallback_;    /* 关闭事件回调 */
+    EventCallback errorCallback_;    /* 错误事件回调 */
+};
 ```
 
-- `int fd_`：这个Channel对象照看的文件描述符
-- `int events_`：代表fd感兴趣的事件类型集合
-- `int revents_`：代表事件监听器实际监听到该fd发生的事件类型集合，当事件监听器监听到一个fd发生了什么事件，通过`Channel::set_revents()`函数来设置revents值。
-- `EventLoop* loop_`：这个 Channel 属于哪个EventLoop对象，因为 muduo 采用的是 one loop per thread 模型，所以我们有不止一个 EventLoop。我们的 manLoop 接收新连接，将新连接相关事件注册到线程池中的某一线程的 subLoop 上（轮询）。我们不希望跨线程的处理函数，所以每个 Channel 都需要记录是哪个 EventLoop 在处理自己的事情，这其中还涉及到了线程判断的问题。
-- `read_callback_` 、`write_callback_`、`close_callback_`、`error_callback_`：这些是 std::function 类型，代表着这个Channel为这个文件描述符保存的各事件类型发生时的处理函数。比如这个fd发生了可读事件，需要执行可读事件处理函数，这时候Channel类都替你保管好了这些可调用函数。到时候交给 EventLoop 执行即可。
-- `index `：我们使用 index 来记录 channel 与 Poller 相关的几种状态，Poller 类会判断当前 channel 的状态然后处理不同的事情。
-   - `kNew`：是否还未被poll监视 
-   - `kAdded`：是否已在被监视中 
-   - `kDeleted`：是否已被移除
-- `kNoneEvent`、`kReadEvent`、`kWriteEvent`：事件状态设置会使用的变量
-# 成员函数
-## 设置此 Channel 对于事件的回调函数
-```cpp
-// 设置回调函数对象
-// 使用右值引用，延长了临时cb对象的生命周期，避免了拷贝操作
-void setReadCallback(ReadEventCallback cb) { readCallback_ = std::move(cb); }
-void setWriteCallback(ReadEventCallback cb) { readCallback_ = std::move(cb); }
-void setCloseCallback(ReadEventCallback cb) { readCallback_ = std::move(cb); }
-void setErrorCallback(ReadEventCallback cb) { readCallback_ = std::move(cb); }
-```
-## 设置 Channel 感兴趣的事件到 Poller
-```cpp
-// 设置fd相应的事件状态，update()其本质调用epoll_ctl
-void enableReading() { events_ |= kReadEvent; update(); }     // 设置读事件到poll对象中
-void disableReading() { events_ &= ~kReadEvent; update(); }   // 从poll对象中移除读时间
-void enableWriting() { events_ |= kWriteEvent; update(); }    // 设置写事件到poll对象中
-void disableWriting() { events_ &= ~kWriteEvent; update(); }  // 从poll对象中移除写时间
-void disableAll() { events_ = kNoneEvent; update(); }         // 关闭所有事件
-bool isWriting() const { return events_ & kWriteEvent; }      // 是否关注写事件
-bool isReading() const { return events_ & kReadEvent; }       // 是否关注读事件
-```
-设置好该 Channel 的监视事件的类型，调用 update 私有函数向 Poller 注册。实际调用 epoll_ctl
-```cpp
+Channel中的几个重要函数：
+
+## handleEvent 处理事件
+
+处理激活的Channel事件，由Poller更新激活的Channel列表，EventLoop::loop()根据激活Channel列表，逐个执行Channel中已注册好的相应回调。实际事件处理工作，由handleEventWithGuard完成。
+
+```c++
 /**
- * 当改变channel所表示fd的events事件后
- * update负责在poller里面更改fd相应的事件epoll_ctl 
- */
+* 处理激活的Channel事件
+* @details Poller中监听到激活事件的Channel后, 将其加入激活Channel列表,
+* EventLoop::loop根据激活Channel回调对应事件处理函数.
+* @param recevieTime Poller中调用epoll_wait/poll返回后的时间. 用户可能需要该参数.
+*/
+void Channel::handleEvent(Timestamp recevieTime)
+{
+    /*
+     * shared_ptr通过RAII方式管理对象资源guard
+     * weak_ptr::lock可将weak_ptr提升为shared_ptr, 引用计数+1
+     */
+    std::shared_ptr<void> guard;
+    if (tied_)
+    {
+        /*
+         * 为什么使用 tie?
+         * 确保在执行事件处理动作时, 所需的对象不会被释放, 但又不能用shared_ptr,
+         * 否则可能导致循环引用. 最好使用weak_ptr, 然后lock提升为shared_ptr, 这样更安全.
+         */
+        guard = tie_.lock();
+        if (guard)
+        {
+            handleEventWithGuard(recevieTime);
+        }
+    }
+    else
+    {
+        handleEventWithGuard(recevieTime);
+    }
+}
+```
+
+## handleEventWithGuard 识别事件并回调
+
+根据不同的激活原因，调用不的回调函数。这些回调函数，是在持有Channel对象，需要进行事件监听的class中进行设置，比如TcpConnection，EventLoop，Acceptor，TimerQueue等。而有些回调函数，经过层层传递，会呈现可网络库的调用者，比如TcpConnection会将处理一个socket fd的读事件回调（新建连接请求），传递给TcpServer::newConnection，这样用户就能通过TcpServer::setConnectionCallback设置其回调。
+
+```c++
+/**
+* 根据不同的激活原因, 调用不同的回调函数
+*/
+void Channel::handleEventWithGuard(Timestamp receiveTime)
+{
+    eventHandling_ = true; // 正在处理事件
+    LOG_TRACE << reventsToString(); // 打印fd及就绪事件
+    if ((revents_ & POLLHUP) && !(revents_ & POLLIN))
+    { // fd挂起(套接字已不在连接中), 并且没有数据可读
+        if (logHup_)
+        { // 打印挂起log
+            LOG_WARN << "fd = " << fd_ << " Channel::handle_event() POLLHUP";
+        }
+        // 调用关闭回调
+        if (closeCallback_) closeCallback_();
+    }
+    if (revents_ & POLLNVAL) // 无效请求, fd没打开
+    { // fd dont be opened
+        LOG_WARN << "fd = " << fd_ << " Channel::handle_event() POLLNVAL";
+    }
+    if (revents_ & (POLLERR | POLLNVAL)) // 错误条件, 或 无效请求, fd没打开
+    { // error or fd dont be opened
+        if (errorCallback_) errorCallback_();
+    }
+    if (revents_ & (POLLIN | POLLPRI | POLLRDHUP)) // 有待读数据, 或 紧急数据(e.g. TCP带外数据), 或流套接字对端关闭连接/写半连接
+    { // there is data, urgent data,  to be read
+        if (readCallback_) readCallback_(receiveTime);
+    }
+    if (revents_ & POLLOUT)
+    {
+        if (writeCallback_) writeCallback_();
+    }
+    eventHandling_ = false;
+}
+```
+
+## update 更新通道
+
+通过EventLoop对象，传递给Poller对象，然后更新其监听的通道列表中对应通道。支持ADD/MOD操作。
+
+```c++
 void Channel::update()
 {
-    // 通过该channel所属的EventLoop，调用poller对应的方法，注册fd的events事件
+    addedToLoop_ = true;
     loop_->updateChannel(this);
 }
+
+void EventLoop::updateChannel(Channel *channel)
+{
+    assert(channel->ownerLoop() == this);
+    assertInLoopThread();
+    poller_->updateChannel(channel);
+}
+
+/**
+* Update array pollfds_
+*
+* O(logN)
+*/
+void PollPoller::updateChannel(Channel *channel)
+{
+    Poller::assertInLoopThread();
+    LOG_TRACE << "fd = " << channel->fd() << " events = " << channel->events();
+    if (channel->index() < 0)
+    { // a new one, add to pollfds_
+        // ensure channel point to a new one
+        assert(channels_.find(channel->fd()) == channels_.end());
+        struct pollfd pfd;
+        pfd.fd = channel->fd();
+        pfd.events = static_cast<short>(channel->events());
+        pfd.revents = 0;
+        pollfds_.push_back(pfd);
+        int idx = static_cast<int>(pollfds_.size()) - 1;
+        channel->set_index(idx);
+        channels_[pfd.fd] = channel; // insert (fd, channel)
+    }
+    else
+    { // update existing one
+        assert(channels_.find(channel->fd()) != channels_.end());
+        assert(channels_[channel->fd()] == channel);
+        int idx = channel->index();
+        // ensure channel does exist in pollfds_
+        assert(0 <= idx && idx < static_cast<int>(pollfds_.size()));
+        struct pollfd& pfd = pollfds_[idx];
+        assert(pfd.fd == channel->fd() || pfd.fd == -channel->fd() - 1);
+        pfd.fd = channel->fd();
+        pfd.events = static_cast<short>(channel->events());
+        pfd.revents = 0;
+        if (channel->isNoneEvent())
+        {
+            // ignore this pollfd
+            pfd.fd = -channel->fd() - 1;
+        }
+    }
+}
 ```
-## 更新Channel关注的事件
-```cpp
-// 更新该fd相关事件
+
+## remove 移除通道
+
+与update类似，也是通过EventLoop传递给Poller对象，将当前通道从Poller的事件列表中删除。支持DEL操作。
+
+```c++
 void Channel::update()
 {
-  // 设置该channel状态为已加入EventLoop
-  addedToLoop_ = true;
-  // 调用EventLoop::updateChannel，传入channel指针
-  // EventLoop::updateChannel => Poller::updateChannel
-  loop_->updateChannel(this);
+    addedToLoop_ = true;
+    loop_->updateChannel(this);
 }
-```
-## 移除操作
-```cpp
-// 从epoll对象中移除该fd
-void Channel::remove()
+
+void EventLoop::updateChannel(Channel *channel)
 {
-  // 断言无事件处理
-  assert(isNoneEvent());  
-  // 设置该Channel没有被添加到eventLoop
-  addedToLoop_ = false;   
-  // 调用EventLoop::removeChannel，传入channel指针
-  // EventLoop::removeChannel => Poller::removeChannel
-  loop_->removeChannel(this);
+    assert(channel->ownerLoop() == this);
+    assertInLoopThread();
+    poller_->updateChannel(channel);
+}
+
+/**
+* 从监听的通道数组channels_中, 移除指定通道
+*/
+void PollPoller::removeChannel(Channel *channel)
+{
+    Poller::assertInLoopThread();
+    LOG_TRACE << "fd = " << channel->fd();
+    assert(channels_.find(channel->fd()) != channels_.end());
+    assert(channels_[channel->fd()] == channel);
+    assert(channel->isNoneEvent());
+    int idx = channel->index();
+    assert(0 <= idx && idx < static_cast<int>(pollfds_.size()));
+    const struct pollfd& pfd = pollfds_[idx]; (void)pfd;
+
+    // ensure remove one invalid channel from channels_
+    assert(pfd.fd == -channel->fd() - 1 && pfd.events == channel->events());
+    size_t n = channels_.erase(channel->fd());
+    assert(n == 1); (void)n;
+
+    // remove pollfd from pollfds_ by index
+    if (implicit_cast<size_t>(idx) == pollfds_.size() - 1)
+    { // last of pollfds_
+        pollfds_.pop_back();
+    }
+    else
+    {
+        // swap the pollfd to be removed with the last of pollfds_,
+        // then remove the last
+        int channelAtEnd = pollfds_.back().fd;
+        iter_swap(pollfds_.begin() + idx, pollfds_.end() - 1);
+        if (channelAtEnd < 0)
+        {
+            channelAtEnd = -channelAtEnd - 1;
+        }
+        channels_[channelAtEnd]->set_index(idx);
+        pollfds_.pop_back();
+    }
 }
 ```
+
 ## 用于增加TcpConnection生命周期的tie方法（防止用户误删操作）
+
 ```cpp
 // 在TcpConnection建立得时候会调用
 void Channel::tie(const std::shared_ptr<void> &obj)
@@ -112,6 +338,7 @@ void Channel::tie(const std::shared_ptr<void> &obj)
     tied_ = true;
 }
 ```
+
 ```cpp
 // fd得到poller通知以后，去处理事件
 void Channel::handleEvent(Timestamp receiveTime)
@@ -136,11 +363,12 @@ void Channel::handleEvent(Timestamp receiveTime)
     }
 }
 ```
+
 用户使用muduo库的时候，会利用到TcpConnection。用户可以看见 TcpConnection，如果用户注册了要监视的事件和处理的回调函数，并在处理 subLoop 处理过程中「误删」了 TcpConnection 的话会发生什么呢？
 
 总之，EventLoop 肯定不能很顺畅的运行下去。毕竟它的生命周期小于 TcpConnection。为了防止用户误删的情况，TcpConnection 在创建之初 `TcpConnection::connectEstablished` 会调用此函数来提升对象生命周期。
 
-实现方案是在处理事件时，如果对被调用了`tie()`方法的Channel对象，我们让一个共享型智能指针指向它，在处理事件期间延长它的生命周期。哪怕外面「误删」了此对象，也会因为多出来的引用计数而避免销毁操作。
+实现方案是在处理事件时，如果对被调用了 `tie()`方法的Channel对象，我们让一个共享型智能指针指向它，在处理事件期间延长它的生命周期。哪怕外面「误删」了此对象，也会因为多出来的引用计数而避免销毁操作。
 
 ```cpp
 // 连接建立
@@ -160,50 +388,13 @@ void TcpConnection::connectEstablished()
     connectionCallback_(shared_from_this());
 }
 ```
+
 注意，传递的是 this 指针，所以是在 Channel 的内部增加对 TcpConnection 对象的引用计数（而不是 Channel 对象）。这里体现了 shared_ptr 的一处妙用，可以通过引用计数来控制变量的生命周期。巧妙地在内部增加一个引用计数，假设在外面误删，也不会因为引用计数为 0 而删除对象。
+
 > `weak_ptr.lock()` 会返回 `shared_ptr`（如果 weak_ptr 不为空）。
 
-## 根据相应事件执行Channel保存的回调函数
-我们的Channel里面保存了许多回调函数，这些都是在对应的事件下被调用的。用户提前设置写好此事件的回调函数，并绑定到Channel的成员里。等到事件发生时，Channel自然的调用事件处理方法。借由回调操作实现了异步的操作。
-```cpp
-void Channel::handleEventWithGuard(Timestamp receiveTime)
-{
-    // 标志，此时正在处理各个事件
-    eventHandling_ = true;
-    LOG_TRACE << reventsToString();
-    // 对端关闭事件
-    if ((revents_ & POLLHUP) && !(revents_ & POLLIN))
-    {
-        if (logHup_)
-        {
-            LOG_WARN << "fd = " << fd_ << " Channel::handle_event() POLLHUP";
-        }
-        // 内部储存function，这是判断是否注册了处理函数，有则直接调用
-        if (closeCallback_) closeCallback_();
-    }
-    // fd不是一个打开的文件
-    if (revents_ & POLLNVAL)
-    {
-        LOG_WARN << "fd = " << fd_ << " Channel::handle_event() POLLNVAL";
-    }
-    // 发生了错误，且fd不可一个可以打开的文件
-    if (revents_ & (POLLERR | POLLNVAL))
-    {
-        if (errorCallback_) errorCallback_();
-    }
-    // 读事件 且是高优先级读且发生了挂起
-    if (revents_ & (POLLIN | POLLPRI | POLLRDHUP))
-    {
-        if (readCallback_) readCallback_(receiveTime);
-    }
-    // 写事件
-    if (revents_ & POLLOUT)
-    {
-        if (writeCallback_) writeCallback_();
-    }
-    eventHandling_ = false;
-}
-```
 # 参考
+
 [万字长文梳理Muduo库核心代码及优秀编程细节思想剖析](https://zhuanlan.zhihu.com/p/495016351)
 
+[muduo笔记 网络库（三）事件通道Channel - 明明1109 - 博客园 (cnblogs.com)](https://www.cnblogs.com/fortunely/p/15997694.html)

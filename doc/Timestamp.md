@@ -6,7 +6,7 @@
 
 ## 对象有效性
 
-```
+```C++
 // Timestamp.h
     bool valid() const
     { return microSecondsSinceEpoch_ > 0; }
@@ -24,7 +24,7 @@
 
 ## 获取当前时间
 
-```
+```C++
 // 获取当前时间戳
 Timestamp Timestamp::now()
 {
@@ -40,7 +40,7 @@ Timestamp Timestamp::now()
 
 ## 获取时间戳
 
-```
+```C++
 //返回当前时间戳的微妙
 int64_t microSecondsSinceEpoch() const { return microSecondsSinceEpoch_; }
 //返回当前时间戳的秒数
@@ -52,7 +52,7 @@ time_t secondsSinceEpoch() const
 
 ## 获取可打印字符串
 
-```
+```C++
     //用std::string形式返回,格式[millisec].[microsec]
     std::string toString() const;
     //格式, "%4d年%02d月%02d日 星期%d %02d:%02d:%02d.%06d",时分秒.微秒
@@ -61,7 +61,7 @@ time_t secondsSinceEpoch() const
 
 ## 辅助函数（非class member函数）
 
-```
+```C++
 /**
  * 定时器需要比较时间戳，因此需要重载运算符
  */
