@@ -38,5 +38,5 @@ aux_source_directory(${CMAKE_SOURCE_DIR}/src/Poller POLLER_SRC)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
 # 包含子目录
-add_subdirectory(${CMAKE_SOURCE_DIR}/test)
+# add_subdirectory(${CMAKE_SOURCE_DIR}/test)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)

@@ -8,6 +8,6 @@ add_executable(server
     ${BUFFER_SRC}
     ${CHANNEL_SRC}
     ${POLLER_SRC}
-    ${CHANNEL_SRC}         
+    ${HTTP_SRC}         
     ${CMAKE_SOURCE_DIR}/src/main.cpp)
 target_link_libraries(server pthread)
