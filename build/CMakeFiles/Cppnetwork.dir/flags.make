@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_FLAGS =  -g -std=c++11 -fPIC -fPIC  
 
-CXX_DEFINES = -Dnetlib_EXPORTS
+CXX_DEFINES = -DCppnetwork_EXPORTS
 
 CXX_INCLUDES = -I/root/Cpp11-NetworkLib/include 
 

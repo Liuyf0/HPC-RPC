@@ -56,17 +56,6 @@ CMAKE_BINARY_DIR = /root/Cpp11-NetworkLib/build
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
-
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
-
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
@@ -77,6 +66,17 @@ edit_cache:
 edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
+
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/usr/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -111,17 +111,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named netlib
+# Target rules for targets named Cppnetwork
 
 # Build rule for target.
-netlib: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 netlib
-.PHONY : netlib
+Cppnetwork: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Cppnetwork
+.PHONY : Cppnetwork
 
 # fast build rule for target.
-netlib/fast:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/build
-.PHONY : netlib/fast
+Cppnetwork/fast:
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/build
+.PHONY : Cppnetwork/fast
 
 src/Acceptor.o: src/Acceptor.cpp.o
 
@@ -129,7 +129,7 @@ src/Acceptor.o: src/Acceptor.cpp.o
 
 # target to build an object file
 src/Acceptor.cpp.o:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Acceptor.cpp.o
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Acceptor.cpp.o
 .PHONY : src/Acceptor.cpp.o
 
 src/Acceptor.i: src/Acceptor.cpp.i
@@ -138,7 +138,7 @@ src/Acceptor.i: src/Acceptor.cpp.i
 
 # target to preprocess a source file
 src/Acceptor.cpp.i:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Acceptor.cpp.i
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Acceptor.cpp.i
 .PHONY : src/Acceptor.cpp.i
 
 src/Acceptor.s: src/Acceptor.cpp.s
@@ -147,8 +147,35 @@ src/Acceptor.s: src/Acceptor.cpp.s
 
 # target to generate assembly for a file
 src/Acceptor.cpp.s:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Acceptor.cpp.s
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Acceptor.cpp.s
 .PHONY : src/Acceptor.cpp.s
+
+src/Buffer.o: src/Buffer.cpp.o
+
+.PHONY : src/Buffer.o
+
+# target to build an object file
+src/Buffer.cpp.o:
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Buffer.cpp.o
+.PHONY : src/Buffer.cpp.o
+
+src/Buffer.i: src/Buffer.cpp.i
+
+.PHONY : src/Buffer.i
+
+# target to preprocess a source file
+src/Buffer.cpp.i:
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Buffer.cpp.i
+.PHONY : src/Buffer.cpp.i
+
+src/Buffer.s: src/Buffer.cpp.s
+
+.PHONY : src/Buffer.s
+
+# target to generate assembly for a file
+src/Buffer.cpp.s:
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Buffer.cpp.s
+.PHONY : src/Buffer.cpp.s
 
 src/Channel.o: src/Channel.cpp.o
 
@@ -156,7 +183,7 @@ src/Channel.o: src/Channel.cpp.o
 
 # target to build an object file
 src/Channel.cpp.o:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Channel.cpp.o
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Channel.cpp.o
 .PHONY : src/Channel.cpp.o
 
 src/Channel.i: src/Channel.cpp.i
@@ -165,7 +192,7 @@ src/Channel.i: src/Channel.cpp.i
 
 # target to preprocess a source file
 src/Channel.cpp.i:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Channel.cpp.i
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Channel.cpp.i
 .PHONY : src/Channel.cpp.i
 
 src/Channel.s: src/Channel.cpp.s
@@ -174,7 +201,7 @@ src/Channel.s: src/Channel.cpp.s
 
 # target to generate assembly for a file
 src/Channel.cpp.s:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Channel.cpp.s
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Channel.cpp.s
 .PHONY : src/Channel.cpp.s
 
 src/CurrentThread.o: src/CurrentThread.cpp.o
@@ -183,7 +210,7 @@ src/CurrentThread.o: src/CurrentThread.cpp.o
 
 # target to build an object file
 src/CurrentThread.cpp.o:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/CurrentThread.cpp.o
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/CurrentThread.cpp.o
 .PHONY : src/CurrentThread.cpp.o
 
 src/CurrentThread.i: src/CurrentThread.cpp.i
@@ -192,7 +219,7 @@ src/CurrentThread.i: src/CurrentThread.cpp.i
 
 # target to preprocess a source file
 src/CurrentThread.cpp.i:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/CurrentThread.cpp.i
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/CurrentThread.cpp.i
 .PHONY : src/CurrentThread.cpp.i
 
 src/CurrentThread.s: src/CurrentThread.cpp.s
@@ -201,7 +228,7 @@ src/CurrentThread.s: src/CurrentThread.cpp.s
 
 # target to generate assembly for a file
 src/CurrentThread.cpp.s:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/CurrentThread.cpp.s
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/CurrentThread.cpp.s
 .PHONY : src/CurrentThread.cpp.s
 
 src/DefaultPoller.o: src/DefaultPoller.cpp.o
@@ -210,7 +237,7 @@ src/DefaultPoller.o: src/DefaultPoller.cpp.o
 
 # target to build an object file
 src/DefaultPoller.cpp.o:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/DefaultPoller.cpp.o
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/DefaultPoller.cpp.o
 .PHONY : src/DefaultPoller.cpp.o
 
 src/DefaultPoller.i: src/DefaultPoller.cpp.i
@@ -219,7 +246,7 @@ src/DefaultPoller.i: src/DefaultPoller.cpp.i
 
 # target to preprocess a source file
 src/DefaultPoller.cpp.i:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/DefaultPoller.cpp.i
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/DefaultPoller.cpp.i
 .PHONY : src/DefaultPoller.cpp.i
 
 src/DefaultPoller.s: src/DefaultPoller.cpp.s
@@ -228,7 +255,7 @@ src/DefaultPoller.s: src/DefaultPoller.cpp.s
 
 # target to generate assembly for a file
 src/DefaultPoller.cpp.s:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/DefaultPoller.cpp.s
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/DefaultPoller.cpp.s
 .PHONY : src/DefaultPoller.cpp.s
 
 src/EPollPoller.o: src/EPollPoller.cpp.o
@@ -237,7 +264,7 @@ src/EPollPoller.o: src/EPollPoller.cpp.o
 
 # target to build an object file
 src/EPollPoller.cpp.o:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/EPollPoller.cpp.o
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/EPollPoller.cpp.o
 .PHONY : src/EPollPoller.cpp.o
 
 src/EPollPoller.i: src/EPollPoller.cpp.i
@@ -246,7 +273,7 @@ src/EPollPoller.i: src/EPollPoller.cpp.i
 
 # target to preprocess a source file
 src/EPollPoller.cpp.i:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/EPollPoller.cpp.i
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/EPollPoller.cpp.i
 .PHONY : src/EPollPoller.cpp.i
 
 src/EPollPoller.s: src/EPollPoller.cpp.s
@@ -255,7 +282,7 @@ src/EPollPoller.s: src/EPollPoller.cpp.s
 
 # target to generate assembly for a file
 src/EPollPoller.cpp.s:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/EPollPoller.cpp.s
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/EPollPoller.cpp.s
 .PHONY : src/EPollPoller.cpp.s
 
 src/EventLoop.o: src/EventLoop.cpp.o
@@ -264,7 +291,7 @@ src/EventLoop.o: src/EventLoop.cpp.o
 
 # target to build an object file
 src/EventLoop.cpp.o:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/EventLoop.cpp.o
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/EventLoop.cpp.o
 .PHONY : src/EventLoop.cpp.o
 
 src/EventLoop.i: src/EventLoop.cpp.i
@@ -273,7 +300,7 @@ src/EventLoop.i: src/EventLoop.cpp.i
 
 # target to preprocess a source file
 src/EventLoop.cpp.i:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/EventLoop.cpp.i
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/EventLoop.cpp.i
 .PHONY : src/EventLoop.cpp.i
 
 src/EventLoop.s: src/EventLoop.cpp.s
@@ -282,7 +309,7 @@ src/EventLoop.s: src/EventLoop.cpp.s
 
 # target to generate assembly for a file
 src/EventLoop.cpp.s:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/EventLoop.cpp.s
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/EventLoop.cpp.s
 .PHONY : src/EventLoop.cpp.s
 
 src/EventLoopThread.o: src/EventLoopThread.cpp.o
@@ -291,7 +318,7 @@ src/EventLoopThread.o: src/EventLoopThread.cpp.o
 
 # target to build an object file
 src/EventLoopThread.cpp.o:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/EventLoopThread.cpp.o
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/EventLoopThread.cpp.o
 .PHONY : src/EventLoopThread.cpp.o
 
 src/EventLoopThread.i: src/EventLoopThread.cpp.i
@@ -300,7 +327,7 @@ src/EventLoopThread.i: src/EventLoopThread.cpp.i
 
 # target to preprocess a source file
 src/EventLoopThread.cpp.i:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/EventLoopThread.cpp.i
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/EventLoopThread.cpp.i
 .PHONY : src/EventLoopThread.cpp.i
 
 src/EventLoopThread.s: src/EventLoopThread.cpp.s
@@ -309,7 +336,7 @@ src/EventLoopThread.s: src/EventLoopThread.cpp.s
 
 # target to generate assembly for a file
 src/EventLoopThread.cpp.s:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/EventLoopThread.cpp.s
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/EventLoopThread.cpp.s
 .PHONY : src/EventLoopThread.cpp.s
 
 src/EventLoopThreadPool.o: src/EventLoopThreadPool.cpp.o
@@ -318,7 +345,7 @@ src/EventLoopThreadPool.o: src/EventLoopThreadPool.cpp.o
 
 # target to build an object file
 src/EventLoopThreadPool.cpp.o:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/EventLoopThreadPool.cpp.o
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/EventLoopThreadPool.cpp.o
 .PHONY : src/EventLoopThreadPool.cpp.o
 
 src/EventLoopThreadPool.i: src/EventLoopThreadPool.cpp.i
@@ -327,7 +354,7 @@ src/EventLoopThreadPool.i: src/EventLoopThreadPool.cpp.i
 
 # target to preprocess a source file
 src/EventLoopThreadPool.cpp.i:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/EventLoopThreadPool.cpp.i
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/EventLoopThreadPool.cpp.i
 .PHONY : src/EventLoopThreadPool.cpp.i
 
 src/EventLoopThreadPool.s: src/EventLoopThreadPool.cpp.s
@@ -336,7 +363,7 @@ src/EventLoopThreadPool.s: src/EventLoopThreadPool.cpp.s
 
 # target to generate assembly for a file
 src/EventLoopThreadPool.cpp.s:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/EventLoopThreadPool.cpp.s
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/EventLoopThreadPool.cpp.s
 .PHONY : src/EventLoopThreadPool.cpp.s
 
 src/InetAddress.o: src/InetAddress.cpp.o
@@ -345,7 +372,7 @@ src/InetAddress.o: src/InetAddress.cpp.o
 
 # target to build an object file
 src/InetAddress.cpp.o:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/InetAddress.cpp.o
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/InetAddress.cpp.o
 .PHONY : src/InetAddress.cpp.o
 
 src/InetAddress.i: src/InetAddress.cpp.i
@@ -354,7 +381,7 @@ src/InetAddress.i: src/InetAddress.cpp.i
 
 # target to preprocess a source file
 src/InetAddress.cpp.i:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/InetAddress.cpp.i
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/InetAddress.cpp.i
 .PHONY : src/InetAddress.cpp.i
 
 src/InetAddress.s: src/InetAddress.cpp.s
@@ -363,7 +390,7 @@ src/InetAddress.s: src/InetAddress.cpp.s
 
 # target to generate assembly for a file
 src/InetAddress.cpp.s:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/InetAddress.cpp.s
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/InetAddress.cpp.s
 .PHONY : src/InetAddress.cpp.s
 
 src/Logger.o: src/Logger.cpp.o
@@ -372,7 +399,7 @@ src/Logger.o: src/Logger.cpp.o
 
 # target to build an object file
 src/Logger.cpp.o:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Logger.cpp.o
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Logger.cpp.o
 .PHONY : src/Logger.cpp.o
 
 src/Logger.i: src/Logger.cpp.i
@@ -381,7 +408,7 @@ src/Logger.i: src/Logger.cpp.i
 
 # target to preprocess a source file
 src/Logger.cpp.i:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Logger.cpp.i
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Logger.cpp.i
 .PHONY : src/Logger.cpp.i
 
 src/Logger.s: src/Logger.cpp.s
@@ -390,7 +417,7 @@ src/Logger.s: src/Logger.cpp.s
 
 # target to generate assembly for a file
 src/Logger.cpp.s:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Logger.cpp.s
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Logger.cpp.s
 .PHONY : src/Logger.cpp.s
 
 src/Poller.o: src/Poller.cpp.o
@@ -399,7 +426,7 @@ src/Poller.o: src/Poller.cpp.o
 
 # target to build an object file
 src/Poller.cpp.o:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Poller.cpp.o
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Poller.cpp.o
 .PHONY : src/Poller.cpp.o
 
 src/Poller.i: src/Poller.cpp.i
@@ -408,7 +435,7 @@ src/Poller.i: src/Poller.cpp.i
 
 # target to preprocess a source file
 src/Poller.cpp.i:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Poller.cpp.i
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Poller.cpp.i
 .PHONY : src/Poller.cpp.i
 
 src/Poller.s: src/Poller.cpp.s
@@ -417,7 +444,7 @@ src/Poller.s: src/Poller.cpp.s
 
 # target to generate assembly for a file
 src/Poller.cpp.s:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Poller.cpp.s
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Poller.cpp.s
 .PHONY : src/Poller.cpp.s
 
 src/Socket.o: src/Socket.cpp.o
@@ -426,7 +453,7 @@ src/Socket.o: src/Socket.cpp.o
 
 # target to build an object file
 src/Socket.cpp.o:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Socket.cpp.o
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Socket.cpp.o
 .PHONY : src/Socket.cpp.o
 
 src/Socket.i: src/Socket.cpp.i
@@ -435,7 +462,7 @@ src/Socket.i: src/Socket.cpp.i
 
 # target to preprocess a source file
 src/Socket.cpp.i:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Socket.cpp.i
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Socket.cpp.i
 .PHONY : src/Socket.cpp.i
 
 src/Socket.s: src/Socket.cpp.s
@@ -444,8 +471,62 @@ src/Socket.s: src/Socket.cpp.s
 
 # target to generate assembly for a file
 src/Socket.cpp.s:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Socket.cpp.s
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Socket.cpp.s
 .PHONY : src/Socket.cpp.s
+
+src/TcpConnection.o: src/TcpConnection.cpp.o
+
+.PHONY : src/TcpConnection.o
+
+# target to build an object file
+src/TcpConnection.cpp.o:
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/TcpConnection.cpp.o
+.PHONY : src/TcpConnection.cpp.o
+
+src/TcpConnection.i: src/TcpConnection.cpp.i
+
+.PHONY : src/TcpConnection.i
+
+# target to preprocess a source file
+src/TcpConnection.cpp.i:
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/TcpConnection.cpp.i
+.PHONY : src/TcpConnection.cpp.i
+
+src/TcpConnection.s: src/TcpConnection.cpp.s
+
+.PHONY : src/TcpConnection.s
+
+# target to generate assembly for a file
+src/TcpConnection.cpp.s:
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/TcpConnection.cpp.s
+.PHONY : src/TcpConnection.cpp.s
+
+src/TcpServer.o: src/TcpServer.cpp.o
+
+.PHONY : src/TcpServer.o
+
+# target to build an object file
+src/TcpServer.cpp.o:
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/TcpServer.cpp.o
+.PHONY : src/TcpServer.cpp.o
+
+src/TcpServer.i: src/TcpServer.cpp.i
+
+.PHONY : src/TcpServer.i
+
+# target to preprocess a source file
+src/TcpServer.cpp.i:
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/TcpServer.cpp.i
+.PHONY : src/TcpServer.cpp.i
+
+src/TcpServer.s: src/TcpServer.cpp.s
+
+.PHONY : src/TcpServer.s
+
+# target to generate assembly for a file
+src/TcpServer.cpp.s:
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/TcpServer.cpp.s
+.PHONY : src/TcpServer.cpp.s
 
 src/Thread.o: src/Thread.cpp.o
 
@@ -453,7 +534,7 @@ src/Thread.o: src/Thread.cpp.o
 
 # target to build an object file
 src/Thread.cpp.o:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Thread.cpp.o
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Thread.cpp.o
 .PHONY : src/Thread.cpp.o
 
 src/Thread.i: src/Thread.cpp.i
@@ -462,7 +543,7 @@ src/Thread.i: src/Thread.cpp.i
 
 # target to preprocess a source file
 src/Thread.cpp.i:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Thread.cpp.i
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Thread.cpp.i
 .PHONY : src/Thread.cpp.i
 
 src/Thread.s: src/Thread.cpp.s
@@ -471,7 +552,7 @@ src/Thread.s: src/Thread.cpp.s
 
 # target to generate assembly for a file
 src/Thread.cpp.s:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Thread.cpp.s
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Thread.cpp.s
 .PHONY : src/Thread.cpp.s
 
 src/Timestamp.o: src/Timestamp.cpp.o
@@ -480,7 +561,7 @@ src/Timestamp.o: src/Timestamp.cpp.o
 
 # target to build an object file
 src/Timestamp.cpp.o:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Timestamp.cpp.o
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Timestamp.cpp.o
 .PHONY : src/Timestamp.cpp.o
 
 src/Timestamp.i: src/Timestamp.cpp.i
@@ -489,7 +570,7 @@ src/Timestamp.i: src/Timestamp.cpp.i
 
 # target to preprocess a source file
 src/Timestamp.cpp.i:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Timestamp.cpp.i
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Timestamp.cpp.i
 .PHONY : src/Timestamp.cpp.i
 
 src/Timestamp.s: src/Timestamp.cpp.s
@@ -498,7 +579,7 @@ src/Timestamp.s: src/Timestamp.cpp.s
 
 # target to generate assembly for a file
 src/Timestamp.cpp.s:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/src/Timestamp.cpp.s
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/src/Timestamp.cpp.s
 .PHONY : src/Timestamp.cpp.s
 
 # Help Target
@@ -507,12 +588,15 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... netlib"
+	@echo "... rebuild_cache"
+	@echo "... Cppnetwork"
 	@echo "... src/Acceptor.o"
 	@echo "... src/Acceptor.i"
 	@echo "... src/Acceptor.s"
+	@echo "... src/Buffer.o"
+	@echo "... src/Buffer.i"
+	@echo "... src/Buffer.s"
 	@echo "... src/Channel.o"
 	@echo "... src/Channel.i"
 	@echo "... src/Channel.s"
@@ -546,6 +630,12 @@ help:
 	@echo "... src/Socket.o"
 	@echo "... src/Socket.i"
 	@echo "... src/Socket.s"
+	@echo "... src/TcpConnection.o"
+	@echo "... src/TcpConnection.i"
+	@echo "... src/TcpConnection.s"
+	@echo "... src/TcpServer.o"
+	@echo "... src/TcpServer.i"
+	@echo "... src/TcpServer.s"
 	@echo "... src/Thread.o"
 	@echo "... src/Thread.i"
 	@echo "... src/Thread.s"

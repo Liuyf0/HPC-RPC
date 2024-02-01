@@ -53,7 +53,7 @@ CMAKE_BINARY_DIR = /root/Cpp11-NetworkLib/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/netlib.dir/all
+all: CMakeFiles/Cppnetwork.dir/all
 
 .PHONY : all
 
@@ -63,36 +63,36 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/netlib.dir/clean
+clean: CMakeFiles/Cppnetwork.dir/clean
 
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/netlib.dir
+# Target rules for target CMakeFiles/Cppnetwork.dir
 
 # All Build rule for target.
-CMakeFiles/netlib.dir/all:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/depend
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/root/Cpp11-NetworkLib/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 "Built target netlib"
-.PHONY : CMakeFiles/netlib.dir/all
+CMakeFiles/Cppnetwork.dir/all:
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/depend
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/root/Cpp11-NetworkLib/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 "Built target Cppnetwork"
+.PHONY : CMakeFiles/Cppnetwork.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/netlib.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /root/Cpp11-NetworkLib/build/CMakeFiles 15
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/netlib.dir/all
+CMakeFiles/Cppnetwork.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /root/Cpp11-NetworkLib/build/CMakeFiles 18
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/Cppnetwork.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /root/Cpp11-NetworkLib/build/CMakeFiles 0
-.PHONY : CMakeFiles/netlib.dir/rule
+.PHONY : CMakeFiles/Cppnetwork.dir/rule
 
 # Convenience name for target.
-netlib: CMakeFiles/netlib.dir/rule
+Cppnetwork: CMakeFiles/Cppnetwork.dir/rule
 
-.PHONY : netlib
+.PHONY : Cppnetwork
 
 # clean rule for target.
-CMakeFiles/netlib.dir/clean:
-	$(MAKE) -f CMakeFiles/netlib.dir/build.make CMakeFiles/netlib.dir/clean
-.PHONY : CMakeFiles/netlib.dir/clean
+CMakeFiles/Cppnetwork.dir/clean:
+	$(MAKE) -f CMakeFiles/Cppnetwork.dir/build.make CMakeFiles/Cppnetwork.dir/clean
+.PHONY : CMakeFiles/Cppnetwork.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.
